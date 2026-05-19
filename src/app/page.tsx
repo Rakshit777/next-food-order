@@ -6,7 +6,7 @@ export default async function Home() {
   let menuItems: MenuItem[] = [];
   
   try {
-    const res = await fetch('http://localhost:5000/api/menu', { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/menu`, { cache: 'no-store' });
     if (res.ok) {
       const result = await res.json();
       if (result.success && Array.isArray(result.data)) {

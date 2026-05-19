@@ -16,7 +16,7 @@ export default function OrderTrackingPage() {
   useEffect(() => {
     const fetchOrderStatus = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/orders/${orderId}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders/${orderId}`);
         if (response.ok) {
           const result = await response.json();
           // The API likely returns { success: true, data: { status: '...' } }

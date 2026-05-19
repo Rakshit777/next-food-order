@@ -50,7 +50,7 @@ export default function CheckoutPage() {
       
       console.log('SENDING PAYLOAD TO BACKEND:', payload);
 
-      const response = await fetch('http://localhost:5000/api/orders', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -64,7 +64,7 @@ export default function CheckoutPage() {
       const orderId = orderData._id || orderData.id || Math.random().toString(36).substring(2, 9).toUpperCase();
       
       clearCart();
-      toast.success('order cretaed success fully');
+      toast.success('Order created successfully');
       router.push('/orders');
     } catch (error) {
       console.error('Error placing order:', error);

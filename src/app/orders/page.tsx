@@ -45,7 +45,7 @@ export default function OrdersListingPage() {
 
     const fetchOrders = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/orders');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders`);
         if (!response.ok) {
           throw new Error('Failed to fetch orders');
         }
@@ -85,7 +85,7 @@ export default function OrdersListingPage() {
     e.preventDefault(); // Prevent navigating to the order tracking page
     
     try {
-      const res = await fetch(`http://localhost:5000/api/orders/${orderId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders/${orderId}`, {
         method: 'DELETE'
       });
       if (res.ok) {
