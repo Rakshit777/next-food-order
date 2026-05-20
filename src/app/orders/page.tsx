@@ -5,25 +5,33 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
-interface OrderItem {
+interface MenuItem {
   _id: string;
-  menuItem: {
-    _id: string;
-    name: string;
-    price: number;
-    image: string;
-  };
+  name: string;
+  price: number;
+  image: string;
+}
+
+interface OrderItem {
+  id?: number;
+  _id?: string;
+  orderId?: number;
+  menuItemId?: number;
   quantity: number;
+  menuItem: MenuItem | null;
 }
 
 interface Order {
-  _id: string;
+  id?: number;
+  _id?: string;
   items: OrderItem[];
   customerName?: string;
   address?: string;
   phone?: string;
   status?: string;
+  totalAmount?: number;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 interface ApiResponse {
@@ -46,6 +54,8 @@ export default function OrdersListingPage() {
     const fetchOrders = async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders`);
+        console.log("response",response);
+        
         if (!response.ok) {
           throw new Error('Failed to fetch orders');
         }
@@ -122,7 +132,10 @@ export default function OrdersListingPage() {
     }
   };
 
-  const calculateTotal = (items: OrderItem[]) => {
+  const calculateTotal = (items: OrderItem[], totalAmount?: number) => {
+    // Use API-provided totalAmount if available
+    if (totalAmount) return totalAmount;
+    // Otherwise calculate from items
     return items.reduce((total, item) => {
       return total + (item.menuItem?.price || 0) * item.quantity;
     }, 0);
@@ -169,12 +182,14 @@ export default function OrdersListingPage() {
         </div>
       ) : (
         <div style={gridStyles}>
-          {orders.map((order) => (
-            <Link href={`/order/${order._id}`} key={order._id}>
+          {orders.map((order) => {
+            const orderId = String(order._id || order.id || 'unknown').trim();
+            return (
+            <Link href={`/order/${orderId}`} key={orderId}>
               <div className="glass-panel" style={orderCardStyles}>
                 <div style={cardHeaderStyles}>
                   <div>
-                    <span style={orderIdStyles}>Order #{order._id.substring(0, 8).toUpperCase()}</span>
+                    <span style={orderIdStyles}>Order #{String(orderId).substring(0, 8).toUpperCase()}</span>
                     {order.createdAt && (
                       <div style={dateStyles}>{new Date(order.createdAt).toLocaleString()}</div>
                     )}
@@ -192,20 +207,30 @@ export default function OrdersListingPage() {
                         <span style={quantityStyles}>{item.quantity}x</span>
                         <span>{item.menuItem?.name || 'Unknown Item'}</span>
                       </div>
-                      <span>${((item.menuItem?.price || 0) * item.quantity).toFixed(2)}</span>
+                      <span>${item.menuItem ? ((item.menuItem.price || 0) * item.quantity).toFixed(2) : '—'}</span>
                     </div>
                   ))}
                 </div>
 
                 <div style={cardFooterStyles}>
-                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                     {order.customerName && (
                       <div style={customerInfoStyles}>
                         <span>👤 {order.customerName}</span>
                       </div>
                     )}
+                    {order.address && (
+                      <div style={customerInfoStyles}>
+                        <span>📍 {order.address}</span>
+                      </div>
+                    )}
+                    {order.phone && (
+                      <div style={customerInfoStyles}>
+                        <span>📞 {order.phone}</span>
+                      </div>
+                    )}
                     <button
-                      onClick={(e) => handleDelete(e, order._id)}
+                      onClick={(e) => handleDelete(e, orderId)}
                       style={{
                         backgroundColor: 'transparent',
                         border: '1px solid #ef4444',
@@ -230,13 +255,14 @@ export default function OrdersListingPage() {
                   <div style={totalStyles}>
                     <span>Total:</span>
                     <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>
-                      ${calculateTotal(order.items).toFixed(2)}
+                      ${calculateTotal(order.items, order.totalAmount).toFixed(2)}
                     </span>
                   </div>
                 </div>
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -15,7 +15,7 @@ export const MenuCard = ({ item }: MenuCardProps) => {
 
   const handleAddToCart = () => {
     addToCart(item);
-    toast.success('order added cart successfulyy');
+    toast.success('Order added to cart successfully');
   };
 
   return (
